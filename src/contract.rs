@@ -132,6 +132,21 @@ pub fn execute(
     }
 }
 
+///
+/// Creates a new Campaign pool or adds funds to an existing one
+///
+/// # Arguments
+///
+/// * `campaign_id`: the id of the campaign
+///
+/// returns: Result<Response, StdError>
+///
+/// # Errors
+///
+/// * Only one coin is allowed
+/// * No funds were sent
+/// * Denom is not the same as the bond denom
+///
 pub fn deposit(
     deps: DepsMut,
     _env: Env,
