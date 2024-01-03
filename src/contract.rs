@@ -1,6 +1,6 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
-use cosmwasm_std::{DepsMut, Env, Response, MessageInfo, StdError, CosmosMsg, BankMsg, Coin, Uint128, Deps, StdResult, Binary, to_binary, Empty};
+use cosmwasm_std::{DepsMut, Env, Response, MessageInfo, StdError, CosmosMsg, BankMsg, Coin, Uint128, Deps, StdResult, Binary, to_binary, Empty, to_json_binary};
 use crate::state::{Campaign, CAMPAIGN_POOL, State, STATE, USER_POOL};
 use crate::msg::{CampaignCheckRequest, CampaignCheckResponse, ExecuteMsg, InstantiateMsg, QueryMsg, UserRewardRequest, UserRewardResponse};
 use cw2::{get_contract_version, set_contract_version};
@@ -133,7 +133,7 @@ pub fn execute(
 }
 
 ///
-/// Creates a new Campaign pool or adds funds to an existing one
+/// Creates a new Campaign pool or adds funds to an existing one, if the campaign already exists
 ///
 /// # Arguments
 ///
@@ -194,6 +194,24 @@ pub fn deposit(
     );
 }
 
+///
+/// Rewards specific users from the funds of a campaign.
+/// The assigned amount is deducted from the campaign pool.
+///
+/// If we try to assign more than the campaign pool has, the transaction does not fail,
+/// but the status of the response will be false.
+///
+/// # Arguments
+///
+/// * `user_rewards`:
+///
+/// returns: Result<Response, StdError>
+///
+/// # Errors
+///
+/// * Only contract owner can call this function
+/// * Campaign does not exist
+///
 pub fn reward_all(
     deps: DepsMut,
     _env: Env,
@@ -243,7 +261,7 @@ pub fn reward_all(
 
     return Ok(Response::new()
         .add_attribute("method", "reward_all")
-        .set_data(to_binary(&res).unwrap())
+        .set_data(to_json_binary(&res).unwrap())
     );
 }
 
